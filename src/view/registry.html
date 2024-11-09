@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - My Node.js App</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+        .form-container {
+            display: inline-block;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 300px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: green;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkgreen;
+        }
+    </style>
+</head>
+<body>
+    <h1>Register for My Node.js App</h1>
+    <div class="form-container">
+        <form id="registerForm">
+            <div>
+                <input type="text" id="username" name="username" placeholder="Username" required />
+            </div>
+            <div>
+                <input type="password" id="password" name="password" placeholder="Password" required />
+            </div>
+            <div>
+                <input type="text" id="lineId" name="lineId" placeholder="Line ID" required />
+            </div>
+            <div>
+                <button type="submit">Register</button>
+      

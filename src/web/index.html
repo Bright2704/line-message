@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Node.js App</title>
+    <style>
+        body {
+            background-color: black; /* พื้นหลังสีดำ */
+            color: white; /* ข้อความสีขาว */
+            font-family: Arial, sans-serif; /* ฟอนต์ */
+            text-align: center; /* จัดกลาง */
+            height: 100vh; /* ความสูงเต็มหน้าจอ */
+            display: flex; /* ใช้ Flexbox */
+            justify-content: center; /* จัดกลางในแนวนอน */
+            align-items: center; /* จัดกลางในแนวตั้ง */
+            flex-direction: column; /* กำหนดทิศทางเป็นแนวตั้ง */
+            margin: 0; /* ลบระยะขอบของ body */
+        }
+        .button-container {
+            margin: 20px 0; /* ระยะห่างจากขอบ */
+            display: flex; /* ใช้ Flexbox สำหรับจัดเรียงปุ่ม */
+            flex-direction: row; /* จัดเรียงในแนวนอน */
+            justify-content: center; /* จัดกลางปุ่ม */
+        }
+        .button-wrapper {
+            margin: 0 10px; /* ระยะห่างระหว่างปุ่ม */
+            text-align: center; /* จัดกลางข้อความใต้ปุ่ม */
+        }
+        .process-button {
+            padding: 10px 20px; /* ขนาดปุ่ม */
+            font-size: 16px; /* ขนาดฟอนต์ในปุ่ม */
+            cursor: pointer; /* เปลี่ยนรูปแบบของเมาส์เมื่อชี้ */
+            background-color: #f0f0f0; /* สีพื้นหลังอ่อน */
+            color: #333; /* สีตัวอักษร */
+            border: none; /* เอาขอบออก */
+            border-radius: 8px; /* มุมโค้งเล็กน้อย */
+            transition: background-color 0.3s ease; /* เพิ่มเอฟเฟกต์นุ่มนวล */
+        }
+        .arrow {
+            font-size: 24px; /* ขนาดลูกศร */
+            display: inline-block; /* แสดงลูกศรในบรรทัดเดียวกับปุ่ม */
+            margin: 0 5px; /* ระยะห่างจากปุ่ม */
+        }
+        .clicked {
+            background-color: green; /* สีเขียวเมื่อคลิก */
+            color: white; /* ข้อความสีขาว */
+        }
+        .process-button:disabled {
+            background-color: gray; /* สีเทาเมื่อปิดการใช้งาน */
+            cursor: not-allowed; /* เปลี่ยนรูปแบบของเมาส์ */
+        }
+        .process-button:hover {
+            background-color: #e0e0e0; /* สีเมื่อวางเมาส์ */
+        }
+        .status {
+            margin-top: 5px; /* ระยะห่างจากปุ่ม */
+            color: lime; /* สีเขียวสำหรับสถานะ */
+        }
+        .warning {
+            color: red; /* สีแดงสำหรับข้อความเตือน */
+            margin-top: 10px; /* ระยะห่างด้านบน */
+        }
+        .selectedUser {
+            margin-top: 20px; /* ระยะห่างจากปุ่ม */
+            color: lime; /* สีเขียวสำหรับข้อความ User ID ที่เลือก */
+        }
+    </style>
+</head>
+<body>
+    <h1>Process Message-API</h1>
+    
+    <div class="button-container">
+        <div class="button-wrapper">
+            <button id="btn1" class="process-button" onclick="handleClick(1)">Process 1</button>
+            <div class="status" id="status1"></div>
+        </div>
+        <span class="arrow">➡️</span>
+        <div class="button-wrapper">
+            <button id="btn2" class="process-button" onclick="handleClick(2)" disabled>Process 2</button>
+            <div class="status" id="status2"></div>
+        </div>
+        <span class="arrow">➡️</span>
+        <div class="button-wrapper">
+            <button id="btn3" class="process-button" onclick="handleClick(3)" disabled>Process 3</button>
+            <div class="status" id="status3"></div>
+        </div>
+        <span class="arrow">➡️</span>
+        <div class="button-wrapper">
+            <button id="btn4" class="process-button" onclick="handleClick(4)" disabled>Process 4</button>
+            <div class="status" id="status4"></div>
+        </div>
+        <span class="arrow">➡️</span>
+        <div class="button-wrapper">
+            <button id="btn5" class="process-button" onclick="handleClick(5)" disabled>Process 5</button>
+            <div class="status" id="status5"></div>
+        </div>
+    </div>
+
+    <button id="getUserIdsButton" onclick="fetchUserIds()">Get User IDs</button> <!-- ปุ่มเพื่อดึง User IDs -->
+    <div id="userIdsContainer"></div> <!-- ช่องแสดง User IDs -->
+    <div class="warning" id="userWarning"></div> <!-- ช่องสำหรับแสดงข้อความเตือน -->
+    <div class="selectedUser" id="selectedUser"></div> <!-- ช่องสำหรับแสดง User ID ที่เลือก -->
+
+    <script>
+        let currentButton = 1; // ตัวแปรติดตามปุ่มที่ต้องคลิก
+        let selectedUserId = null; // ตัวแปรสำหรับเก็บ User ID ที่เลือก
+
+        function handleClick(buttonNumber) {
+            const button = document.getElementById(`btn${buttonNumber}`);
+            
+            // ตรวจสอบว่ามีการเลือก User ID หรือไม่
+            if (!selectedUserId) {
+                document.getElementById('userWarning').innerText = 'กรุณาเลือก User ID ก่อน!';
+                return; // ไม่ให้ดำเนินการถัดไป
+            } else {
+                document.getElementById('userWarning').innerText = ''; // ลบข้อความเตือน
+            }
+
+            if (buttonNumber === currentButton) {
+                button.classList.add('clicked');
+
+                fetch(`/click/${buttonNumber}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById(`status${buttonNumber}`).innerText = data; // แสดงสถานะที่ได้รับ
+                    });
+
+                currentButton++;
+
+                const nextButton = document.getElementById(`btn${currentButton}`);
+                if (nextButton) {
+                    nextButton.disabled = false; // เปิดการใช้งานปุ่มถัดไป
+                }
+            }
+        }
+
+        function fetchUserIds() {
+            fetch('/user-ids') // ดึง User IDs จากเซิร์ฟเวอร์
+                .then(response => response.json())
+                .then(userIds => {
+                    const container = document.getElementById('userIdsContainer');
+                    container.innerHTML = ''; // ล้างข้อมูลเก่า
+                    userIds.forEach(userId => {
+                        // สร้างปุ่มให้เลือก User ID
+                        const button = document.createElement('button');
+                        button.textContent = userId;
+                        button.onclick = () => selectUserId(userId); // ส่งข้อความไปยัง User ID นี้
+                        container.appendChild(button); // เพิ่มปุ่มลงใน container
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching user IDs:', error);
+                });
+        }
+
+        function selectUserId(userId) {
+            selectedUserId = userId; // เก็บ User ID ที่เลือก
+            document.getElementById('userWarning').innerText = ''; // ลบข้อความเตือน
+            document.getElementById('selectedUser').innerText = `Selected User: ${selectedUserId}`; // แสดง User ID ที่เลือก
+            
+            // ลบ User IDs ที่แสดง
+            document.getElementById('userIdsContainer').innerHTML = ''; // ลบ User IDs ที่แสดง
+            
+            // ส่งการเลือก User ID ไปยังเซิร์ฟเวอร์
+            fetch(`/select-user/${userId}`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data); // แสดงผลลัพธ์ที่ได้รับ
+                })
+                .catch(error => {
+                    console.error('Error selecting user:', error);
+                });
+        }
+
+        // เรียกใช้เส้นทาง /click1/World (ถ้าต้องการ)
+        fetch('/click1/World')
+            .then(response => response.text())
+            .then(data => {
+                console.log(data); // แสดงข้อมูลที่ได้
+            });
+    </script>
+</body>
+</html>
