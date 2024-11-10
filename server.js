@@ -20,11 +20,6 @@ const headers = {
     Authorization: `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`
 }
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/src/login.html');
-});
-
-
 app.get('/login', (req, res) => {
     const liffUrl = "https://liff.line.me/2006545984-bnyRkq1E";
     res.redirect(liffUrl);
