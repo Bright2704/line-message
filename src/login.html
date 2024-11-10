@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Login with LINE</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+
+<body>
+    <h1>Login with LINE</h1>
+    <button onclick="initializeApp()">Login</button>
+    <button onclick="logout()" style="display:none;" id="logoutButton">Logout</button>
+
+    <h2>All Users</h2>
+    <div id="userList"></div>  <!-- แสดงรายชื่อผู้ใช้ทั้งหมด -->
+
+    <div id="userProfile" style="display:none;">
+        <h2>User Profile</h2>
+        <p id="displayName"></p>
+        <p id="statusMessage"></p>
+        <p id="userId"></p>
+        <p id="language"></p>
+        <p id="email"></p>
+        <img id="userImage" />
+    </div>
+
+    <script>
+        let userId;
+
+        function initializeApp() {
+            liff.init({ liffId: "2006545984-bnyRkq1E" }).then(() => {
+                if (liff.isLoggedIn()) {
+                    getProfile();
+                } else {
+                    liff.login();
+                }
+            }).catch((err) => {
+                console.error('LIFF initialization failed', err);
+            });
+        }
+
+        function getProfile() {
+            liff.getProfile().then(profile => {
+                // แสดงข้อมูลโปรไฟล์
+                document.getElementById('displayName').textContent = `Display Name: ${profile.displayName}`;
+                document.getElementById('statusMessage').textContent = `Status Message: ${profile.statusMessage}`;
+                document.getElementById('userId').textContent = `User ID: ${profile.userId}`;
+                document.getElementById('language').textContent = `Language: ${profile.language}`;
+
+                // ตรวจสอบว่ามีอีเมลหรือไม่ (อาจจะต้องใช้ LIFF v2 สำหรับการดึงอีเมล)
+                if (profile.email) {
+                    document.getElementById('email').textContent = `Email: ${profile.email}`;
+                } else {
+                    document.getElementById('email').textContent = 'Email: Not available';
+                }
+
+                document.getElementById('userImage').src = profile.pictureUrl;
+                document.getElementById('userProfile').style.display = 'block';
+
+                // แสดงปุ่ม logout
+                document.getElementById('logoutButton').style.display = 'inline';
+
+                userId = profile.userId;  // เก็บ userId เพื่อใช้ในการดึงข้อมูลจากฐานข้อมูล
+                // ส่งข้อมูลไปยังเซิร์ฟเวอร์
+                sendUserDataToServer(profile);
+            }).catch((err) => {
+                console.error('Failed to get user profile', err);
+            });
+        }
+
+        // ส่งข้อมูลไปยังเซิร์ฟเวอร์
+        function sendUserDataToServer(profile) {
+            fetch('https://6500-2403-6200-8820-6973-d59-d32d-a1c9-8e43.ngrok-free.app/save-user-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: profile.userId,
+                    displayName: profile.displayName,
+                    pictureUrl: profile.pictureUrl,
+                    statusMessage: profile.statusMessage,
+                    language: profile.language,
+                    email: profile.email || 'N/A'  // ถ้าไม่มีอีเมลจะส่ง 'N/A'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server Response:', data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // ฟังก์ชันดึงข้อมูลผู้ใช้ทั้งหมดจากฐานข้อมูล
+        function fetchAllUsersFromServer() {
+            fetch('https://6500-2403-6200-8820-6973-d59-d32d-a1c9-8e43.ngrok-free.app/get-all-users')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const users = data.users;
+                        console.log('All users from database:', users);
+                        displayUserList(users);  // แสดงรายชื่อผู้ใช้ทั้งหมด
+                    } else {
+                        alert('No users found.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching users:', error);
+                });
+        }
+
+        // ฟังก์ชันแสดงรายชื่อผู้ใช้ทั้งหมด
+        function displayUserList(users) {
+            const userListElement = document.getElementById('userList');
+            userListElement.innerHTML = '';  // ล้างข้อมูลเก่า
+
+            users.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.innerHTML = `
+                    <p><strong>${user.username}</strong></p>
+                    <p>ID: ${user.lineId}</p>
+                    <img src="${user.profilePicture}" alt="${user.username}" width="50" height="50"/>
+                    <p>Status: ${user.statusMessage}</p>
+                    <hr />
+                `;
+                userListElement.appendChild(userElement);
+            });
+        }
+
+        // ฟังก์ชัน Logout
+        function logout() {
+            liff.logout();
+            window.location.reload();  // รีเฟรชหน้าหลังจาก logout
+        }
+
+        // ดึงข้อมูลผู้ใช้ทั้งหมดเมื่อโหลดหน้า
+        fetchAllUsersFromServer();
+    </script>
+</body>
+
+</html>

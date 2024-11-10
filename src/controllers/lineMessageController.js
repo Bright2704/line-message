@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { CHANNEL_ACCESS_TOKEN } = process.env;
+const { CHANNEL_ACCESS_TOKEN } = process.env.CHANNEL_ACCESS_TOKEN;
 
 // ฟังก์ชันส่งข้อความ LINE
 const sendLineMessage = (userId, message) => {
