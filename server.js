@@ -21,7 +21,7 @@ const headers = {
 }
 
 app.get('/login', (req, res) => {
-    const liffUrl = "https://liff.line.me/2006545984-bnyRkq1E";
+    const liffUrl = "https://liff.line.me/2006545984-y0ANvqlo";
     res.redirect(liffUrl);
 });
 
