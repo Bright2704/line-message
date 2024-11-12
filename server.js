@@ -10,6 +10,11 @@ require('dotenv').config();
 const PORT = '3000'
 connectDB();
 
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/src/login.html');
+});
+
+
 const LINE_BOT_API = 'https://api.line.me/v2/bot'
 const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN
 const User = require('./src/models/userModel')
